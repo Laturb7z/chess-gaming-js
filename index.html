@@ -43,7 +43,7 @@
           <h3>PARTIDAS ENCERRADAS</h3>
           <div id="finished-games-list"></div>
         </section>
-
+        
         <div class="stats-data-actions">
           <button id="clear-stats-btn" type="button">
             <i class="fa-solid fa-chart-simple"></i>
@@ -130,63 +130,56 @@
           </details>
         </div>
         
-<div class="menu-section" id="variant-section">
-  <h2>Variante de xadrez</h2>
-
-  <label class="menu-option">
-    <input type="radio" name="chess-variant" value="classic" checked>
-    <span>Clássico</span>
-  </label>
-
-  <label class="menu-option">
-    <input type="radio" name="chess-variant" value="chess960">
-    <span>Chess960 (Fischer Random)</span>
-  </label>
-
-  <!-- CONFIGURAÇÃO CHESS960 -->
-  <div class="chess960-position-preview" id="chess960-config" hidden>
-
-    <div class="chess960-header">
-      <i class="fa-solid fa-chess-board"></i>
-      <h3>Configuração Chess960</h3>
-    </div>
-
-    <p class="chess960-description">
-      Escolha uma das 960 posições ou sorteie uma configuração.
-    </p>
-
-    <label for="chess960-position">
-      Número da posição
-    </label>
-
-    <div class="chess960-controls">
-      <input
-        type="number"
-        id="chess960-position"
-        min="0"
-        max="959"
-        step="1"
-        value="518"
-      >
-
-      <button type="button" id="chess960-randomize">
-        <i class="fa-solid fa-shuffle"></i>
-        Sortear
-      </button>
-    </div>
-
-    <div class="chess960-preview-box">
-      <span>Prévia da posição</span>
-
-      <p id="chess960-preview" aria-live="polite"></p>
-    </div>
-
-    <p class="difficulty-hint">
-      No Chess960, a posição inicial das peças é sorteada.
-      Disponível para PvP local e contra o Stockfish 19.
-    </p>
-
-  </div>
+        <div class="menu-section" id="variant-section">
+          <h2>Variante de xadrez</h2>
+          
+          <label class="menu-option">
+            <input type="radio" name="chess-variant" value="classic" checked>
+            <span>Clássico</span>
+          </label>
+          
+          <label class="menu-option">
+            <input type="radio" name="chess-variant" value="chess960">
+            <span>Chess960 (Fischer Random)</span>
+          </label>
+          
+          <!-- CONFIGURAÇÃO CHESS960 -->
+          <div class="chess960-position-preview" id="chess960-config" hidden>
+            
+            <div class="chess960-header">
+              <i class="fa-solid fa-chess-board"></i>
+              <h3>Configuração Chess960</h3>
+            </div>
+            
+            <p class="chess960-description">
+              Escolha uma das 960 posições ou sorteie uma configuração.
+            </p>
+            
+            <label for="chess960-position">
+              Número da posição
+            </label>
+            
+            <div class="chess960-controls">
+              <input type="number" id="chess960-position" min="0" max="959" step="1" value="518">
+              
+              <button type="button" id="chess960-randomize">
+                <i class="fa-solid fa-shuffle"></i>
+                Sortear
+              </button>
+            </div>
+            
+            <div class="chess960-preview-box">
+              <span>Prévia da posição</span>
+              
+              <p id="chess960-preview" aria-live="polite"></p>
+            </div>
+            
+            <p class="difficulty-hint">
+              No Chess960, a posição inicial das peças é sorteada.
+              Disponível para PvP local e contra o Stockfish 19.
+            </p>
+            
+          </div>
         </div>
         <div class="menu-section">
           <h2>Escolha a cor que deseja jogar</h2>
@@ -206,15 +199,10 @@
         <div class="menu-section">
           <h2>Tempo da partida</h2>
           <div class="time-options">
-       <label class="time-option">
-  <input
-    type="radio"
-    name="game-time"
-    value="180000"
-    data-increment="2000"
-  >
-  <span>3 + 2</span>
-</label>
+            <label class="time-option">
+              <input type="radio" name="game-time" value="180000" data-increment="2000">
+              <span>3 + 2</span>
+            </label>
             <label class="time-option">
               <input type="radio" name="game-time" value="300000">
               <span>5 + 0</span>
@@ -482,7 +470,10 @@
   <!-- SCRIPTS -->
   <script type="module" src="src/script/chess-game.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    eruda.init();
+  </script>
   
   <div id="stats-confirm-overlay" hidden>
     <div class="stats-confirm-box" role="dialog" aria-modal="true" aria-labelledby="stats-confirm-title">
