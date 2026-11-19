@@ -291,34 +291,45 @@ export function setupOnlineLobby() {
         throw new Error('A sala já possui dois jogadores.');
       }
 
+console.log('[PvP DEBUG] Antes da transação:', {
+  uid,
+  sessionId,
+  room: id,
+  status: data.status,
+  players: data.players
+});
       const result = await svc.db.runTransaction(
-        path,
-        existing => {
-          if (!existing) return;
+  path,
+  existing => {
+    if (existing === null) {
+      // Usa os dados obtidos na leitura inicial.
+      existing = data;
+    }
 
-          if (existing.status !== 'waiting') {
-            return;
-          }
+    if (existing.status !== 'waiting') return;
 
-          const players = existing.players || {};
+    const players = existing.players || {};
 
-          if (players.black) return;
+    if (players.black) return;
 
-          if (isOwnPlayer(players.white, uid)) {
-            return;
-          }
+    if (isOwnPlayer(players.white, uid)) return;
 
-          return {
-            ...existing,
-            players: {
-              ...players,
-              black: makePlayer(uid)
-            },
-            status: 'ready'
-          };
-        },
-        { applyLocally: false }
-      );
+    return {
+      ...existing,
+      players: {
+        ...players,
+        black: makePlayer(uid)
+      },
+      status: 'ready'
+    };
+  },
+  { applyLocally: false }
+);
+      
+      console.log('[PvP DEBUG] Resultado:', {
+  committed: result.committed,
+  snapshot: result.snapshot.val()
+});
 
       if (!result.committed) {
         throw new Error(
