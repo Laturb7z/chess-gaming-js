@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { normalizeChess960UciMove } from '../../src/script/chess960/chess960Uci.js';
+const piece = (type, color) => ({ dataset: { type }, classList: { contains: c => c === color } });
+const board = { e1: piece('King-W','white'), h1: piece('Rook-K-W','white'), a1: piece('Rook-Q-W','white'), b1: piece('Knight-W','white'), g1: piece('King-W','white') };
+const at = square => board[square];
+assert.equal(normalizeChess960UciMove('e1h1',at).castle.kingTo,'g1');
+assert.equal(normalizeChess960UciMove('e1a1',at).castle.kingTo,'c1');
+assert.equal(normalizeChess960UciMove('e1b1',at).castle,null);
+assert.equal(normalizeChess960UciMove('e2e4',at).castle,null);
+assert.equal(normalizeChess960UciMove('g1h1',at).castle.kingTo,'g1');
+assert.throws(() => normalizeChess960UciMove('bad',at));
+console.log('Chess960 UCI: OK');

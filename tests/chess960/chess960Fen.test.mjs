@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { getChess960CastlingRights } from '../../src/script/chess960/chess960Fen.js';
+const b = new Map();
+const put = (r,c,type) => b.set(`${r}:${c}`, { dataset: {type}, classList: {contains: () => false} });
+const at = (r,c) => b.get(`${r}:${c}`);
+put(7,3,'King-W'); put(7,0,'Rook-Q-W'); put(7,6,'Rook-K-W');
+put(0,3,'King-B'); put(0,0,'Rook-Q-B'); put(0,6,'Rook-K-B');
+const flags = {white:{},black:{}};
+assert.equal(getChess960CastlingRights(at,flags),'GAga');
+flags.white.kingRookMoved = true;
+assert.equal(getChess960CastlingRights(at,flags),'Aga');
+flags.black.kingMoved = true;
+assert.equal(getChess960CastlingRights(at,flags),'A');
+console.log('Chess960 FEN: direitos por coluna de torre aprovados');

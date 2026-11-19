@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="src/style/chess-style.css" />
+  
+  <title>Chess Gaming Js</title>
+</head>
+
+<body>
+  
+  
+  <!-- MENU INICIAL -->
+  <div id="game-menu" class="game-menu">
+    <div class="menu-panel">
+      
+      <button id="open-stats-btn" type="button">
+        <i class="fa-solid fa-chart-simple"></i>
+        ESTATÍSTICAS
+      </button>
+      
+      <section id="stats-panel" hidden>
+        <h2>ESTATÍSTICAS</h2>
+        
+        <div class="stats-tabs">
+          <button type="button" class="stats-tab active" data-mode="computer">VS COMPUTADOR</button>
+          <button type="button" class="stats-tab" data-mode="pvp">VS JOGADOR</button>
+        </div>
+        
+        <div class="stats-grid">
+          <div>Partidas <strong id="stats-played">0</strong></div>
+          <div id="stats-wins-label">Vitórias <strong id="stats-wins">0</strong></div>
+          <div id="stats-losses-label">Derrotas <strong id="stats-losses">0</strong></div>
+          <div>Empates <strong id="stats-draws">0</strong></div>
+        </div>
+        
+        <p>Taxa de vitórias: <strong id="stats-rate">0%</strong></p>
+        
+        <section class="finished-games-section">
+          <h3>PARTIDAS ENCERRADAS</h3>
+          <div id="finished-games-list"></div>
+        </section>
+
+        <div class="stats-data-actions">
+          <button id="clear-stats-btn" type="button">
+            <i class="fa-solid fa-chart-simple"></i>
+            LIMPAR ESTATÍSTICAS
+          </button>
+          
+          <button id="clear-all-data-btn" type="button">
+            <i class="fa-solid fa-trash"></i>
+            LIMPAR TODOS OS DADOS
+          </button>
+        </div>
+        
+        <button id="close-stats-btn" type="button">VOLTAR</button>
+      </section>
+      
+      <div class="menu-icon">♚</div>
+      
+      <h1>CHESS GAMING JS</h1>
+      <p class="menu-subtitle" id="menu-subtitle">
+        Configure sua partida
+      </p>
+      
+      <button type="button" id="continue-game-btn" hidden>♟ CONTINUAR PARTIDA</button>
+      <button type="button" id="open-online-lobby">🌐 PvP ONLINE (BETA)</button>
+      <section id="online-lobby" hidden class="online-lobby">
+        <h2>SALAS ONLINE · FASE 13.1</h2>
+        <p>Crie uma sala ou entre com o código de outro jogador. Esta etapa testa conexão e presença; lances online ainda não estão habilitados.</p>
+        <input id="online-room-code" type="text" maxlength="6" placeholder="CÓDIGO DA SALA" autocomplete="off" aria-label="Código da sala">
+        <div class="online-actions">
+          <button id="create-online-room" type="button">CRIAR SALA</button>
+          <button id="join-online-room" type="button">ENTRAR</button>
+          <button id="leave-online-room" type="button">SAIR DA SALA</button>
+          <button id="close-online-lobby" type="button">FECHAR</button>
+        </div>
+        <p id="online-current-room" aria-live="polite"></p>
+        <p id="online-room-status" role="status">Configure o Firebase para conectar.</p>
+      </section>
+      <form id="game-menu-form">
+        <div class="menu-section">
+          <h2>Modo de jogo</h2>
+          <label class="menu-option">
+            <input type="radio" name="game-mode" value="pvp" checked>
+            <span>Jogador vs. Jogador</span>
+          </label>
+          <label class="menu-option">
+            <input type="radio" name="game-mode" value="computer">
+            <span>Jogador vs. Computador (Stockfish)</span>
+          </label>
+        </div>
+        <div class="menu-section" id="difficulty-section" hidden>
+          <h2>Dificuldade do Stockfish</h2>
+          <input type="hidden" id="ai-difficulty" name="ai-difficulty" value="0">
+          <div class="difficulty-options difficulty-options-compact" role="group" aria-label="Escolha a dificuldade">
+            <button type="button" class="difficulty-option selected" data-skill="0" aria-pressed="true">Iniciante <span>Nível 0</span></button>
+            <button type="button" class="difficulty-option" data-skill="3" aria-pressed="false">Fácil <span>Nível 3</span></button>
+            <button type="button" class="difficulty-option" data-skill="7" aria-pressed="false">Normal <span>Nível 7</span></button>
+            <button type="button" class="difficulty-option" data-skill="12" aria-pressed="false">Difícil <span>Nível 12</span></button>
+            <button type="button" class="difficulty-option" data-skill="17" aria-pressed="false">Especialista <span>Nível 17</span></button>
+            <button type="button" class="difficulty-option" data-skill="20" aria-pressed="false">Força máxima <span>Nível 20</span></button>
+          </div>
+          <p class="difficulty-hint">A dificuldade limita a força da Engine, não representa um Elo exato.</p>
+          <details class="stockfish-advanced">
+            <summary><i class="fa-solid fa-sliders"></i> Configurações avançadas</summary>
+            <div class="stockfish-advanced-body">
+              <label for="ai-move-time">Tempo de análise por lance <output id="ai-move-time-value">0,6 s</output></label>
+              <input id="ai-move-time" name="ai-move-time" type="range" min="200" max="5000" step="100" value="600">
+              <p class="difficulty-hint">Quanto mais tempo, maior pode ser a qualidade da busca.</p>
+              <label for="ai-hash">Memória de análise (Hash)</label>
+              <select id="ai-hash" name="ai-hash">
+                <option value="16">16 MB</option>
+                <option value="32" selected>32 MB</option>
+                <option value="64">64 MB</option>
+              </select>
+              <label class="stockfish-elo-toggle" for="ai-limit-elo">
+                <input id="ai-limit-elo" name="ai-limit-elo" type="checkbox">
+                Limitar força por Elo aproximado
+              </label>
+              <div id="ai-elo-controls" hidden>
+                <label for="ai-elo">Elo aproximado <output id="ai-elo-value">1600</output></label>
+                <input id="ai-elo" name="ai-elo" type="range" min="1320" max="3190" step="10" value="1600">
+                <p class="difficulty-hint">O Elo é uma estimativa da engine, não uma classificação garantida. Ao ativar, substitui a limitação por nível.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+        
+<div class="menu-section" id="variant-section">
+  <h2>Variante de xadrez</h2>
+
+  <label class="menu-option">
+    <input type="radio" name="chess-variant" value="classic" checked>
+    <span>Clássico</span>
+  </label>
+
+  <label class="menu-option">
+    <input type="radio" name="chess-variant" value="chess960">
+    <span>Chess960 (Fischer Random)</span>
+  </label>
+
+  <!-- CONFIGURAÇÃO CHESS960 -->
+  <div class="chess960-position-preview" id="chess960-config" hidden>
+
+    <div class="chess960-header">
+      <i class="fa-solid fa-chess-board"></i>
+      <h3>Configuração Chess960</h3>
+    </div>
+
+    <p class="chess960-description">
+      Escolha uma das 960 posições ou sorteie uma configuração.
+    </p>
+
+    <label for="chess960-position">
+      Número da posição
+    </label>
+
+    <div class="chess960-controls">
+      <input
+        type="number"
+        id="chess960-position"
+        min="0"
+        max="959"
+        step="1"
+        value="518"
+      >
+
+      <button type="button" id="chess960-randomize">
+        <i class="fa-solid fa-shuffle"></i>
+        Sortear
+      </button>
+    </div>
+
+    <div class="chess960-preview-box">
+      <span>Prévia da posição</span>
+
+      <p id="chess960-preview" aria-live="polite"></p>
+    </div>
+
+    <p class="difficulty-hint">
+      No Chess960, a posição inicial das peças é sorteada.
+      Disponível para PvP local e contra o Stockfish 19.
+    </p>
+
+  </div>
+        </div>
+        <div class="menu-section">
+          <h2>Escolha a cor que deseja jogar</h2>
+          <label class="menu-option">
+            <input type="radio" name="board-color" value="white" checked>
+            <span>Brancas</span>
+          </label>
+          <label class="menu-option">
+            <input type="radio" name="board-color" value="black">
+            <span>Pretas</span>
+          </label>
+          <label class="menu-option">
+            <input type="radio" name="board-color" value="random">
+            <span>Aleatória</span>
+          </label>
+        </div>
+        <div class="menu-section">
+          <h2>Tempo da partida</h2>
+          <div class="time-options">
+       <label class="time-option">
+  <input
+    type="radio"
+    name="game-time"
+    value="180000"
+    data-increment="2000"
+  >
+  <span>3 + 2</span>
+</label>
+            <label class="time-option">
+              <input type="radio" name="game-time" value="300000">
+              <span>5 + 0</span>
+            </label>
+            <label class="time-option">
+              <input type="radio" name="game-time" value="600000" checked>
+              <span>10 + 0</span>
+            </label>
+            
+            <label class="time-option">
+              <input type="radio" name="game-time" value="900000">
+              <span>15 + 0</span>
+            </label>
+          </div>
+        </div>
+        
+        <button type="submit" id="start-game-btn">
+          <i class="fa-solid fa-play"></i>
+          JOGAR
+        </button>
+      </form>
+    </div>
+  </div>
+  <!-- FIM DO MENU -->
+  
+  
+  <div class="game-layout" id="game-layout" hidden>
+    
+    <!-- PARTE SUPERIOR -->
+    <div class="game-info">
+      
+      <!-- Peças capturadas -->
+      <div class="captured-pieces" hidden>
+        <div class="captured-row">
+          <span>Brancas:</span>
+          <div id="white-captures" class="captured-list"></div>
+        </div>
+        
+        <div class="captured-row">
+          <span>Pretas:</span>
+          <div id="black-captures" class="captured-list"></div>
+        </div>
+      </div>
+      
+      <!-- Histórico de jogadas -->
+      <div class="move-history" hidden>
+        <h2>♟ Histórico</h2>
+        <button id="show-finished-result-btn" type="button" hidden>
+          <i class="fa-solid fa-trophy"></i>
+          Ver resultado
+        </button>
+        <div id="move-history-list"></div>
+        <div class="history-export-buttons">
+          <button id="export-fen-btn" type="button">
+            Exportar FEN
+          </button>
+          
+          <button id="export-pgn-btn" type="button">
+            Exportar PGN
+          </button>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- TABULEIRO -->
+    <div id="chessboard"></div>
+    
+    <!-- PARTE INFERIOR -->
+    <div class="game-bottom">
+      
+      <!-- Relógios -->
+      <div class="chess-clocks">
+        
+        <!-- Relógio das pretas -->
+        <div class="chess-clock" id="black-clock">
+          <span class="clock-player">Pretas</span>
+          <span class="clock-time" id="black-time">10:00</span>
+        </div>
+        
+        <!-- Relógio das brancas -->
+        <div class="chess-clock" id="white-clock">
+          <span class="clock-player">Brancas</span>
+          <span class="clock-time" id="white-time">10:00</span>
+        </div>
+        
+      </div>
+      
+      
+      <div class="game-controls" hidden>
+        
+        <!-- Navegação do replay -->
+        <button id="replay-start-btn" type="button" hidden title="Ir para o início" aria-label="Ir para o início">
+          <i class="fa-solid fa-backward-fast"></i>
+        </button>
+        
+        <button id="undo-move-btn" type="button" title="Desfazer lance" aria-label="Desfazer lance">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span class="control-label">Desfazer</span>
+        </button>
+        
+        <button id="redo-move-btn" type="button" disabled title="Refazer lance" aria-label="Refazer lance">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span class="control-label">Refazer</span>
+        </button>
+        
+        <button id="replay-end-btn" type="button" hidden title="Ir para o final" aria-label="Ir para o final">
+          <i class="fa-solid fa-forward-fast"></i>
+        </button>
+        
+        <!-- Ações da partida -->
+        <button id="restart-match-btn" type="button">
+          <i class="fa-solid fa-rotate"></i>
+          <span class="control-label">Reiniciar</span>
+        </button>
+        
+        <button id="resign-game-btn" type="button">
+          <i class="fa-solid fa-flag"></i>
+          <span class="control-label">Desistir</span>
+        </button>
+        
+        <button id="claim-draw-btn" type="button">
+          <i class="fa-solid fa-handshake"></i>
+          <span class="control-label">Empate</span>
+        </button>
+        
+      </div>
+      
+    </div>
+    
+  </div>
+  
+  <!-- PAINEL DE PROMOÇÃO -->
+  <div id="promotion-overlay" class="promotion-overlay" hidden>
+    <div class="promotion-modal" role="dialog" aria-modal="true" aria-labelledby="promotion-title">
+      
+      <h2 id="promotion-title">PROMOÇÃO</h2>
+      
+      <p class="promotion-subtitle">
+        Seu peão chegou à última fileira!
+      </p>
+      
+      <div class="promotion-options">
+        
+        <button class="promotion-option" data-promotion="Queen" type="button">
+          <img alt="Dama" />
+          <span>Dama</span>
+        </button>
+        
+        <button class="promotion-option" data-promotion="Rook" type="button">
+          <img alt="Torre" />
+          <span>Torre</span>
+        </button>
+        
+        <button class="promotion-option" data-promotion="Bishop" type="button">
+          <img alt="Bispo" />
+          <span>Bispo</span>
+        </button>
+        
+        <button class="promotion-option" data-promotion="Knight" type="button">
+          <img alt="Cavalo" />
+          <span>Cavalo</span>
+        </button>
+        
+      </div>
+      
+      <p class="promotion-description">
+        Escolha uma das peças para promover seu peão.
+      </p>
+      
+    </div>
+  </div>
+  
+  <!-- PAINEL DE ENCERRAMENTO -->
+  <div id="checkmate-overlay" class="checkmate-overlay" hidden>
+    <div class="checkmate-panel">
+      
+      <div class="checkmate-icon">♚</div>
+      
+      <h2 id="checkmate-title">XEQUE-MATE!</h2>
+      
+      <p id="checkmate-winner">Brancas venceram!</p>
+      
+      <!-- Visualizar histórico -->
+      <button id="view-finished-history-btn" type="button">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        Analisar partida
+      </button>
+      
+      <!-- Exportar partida -->
+      <button id="export-finished-pgn-btn" type="button">
+        <i class="fa-solid fa-file-export"></i>
+        Exportar PGN
+      </button>
+      
+      <!-- Reiniciar partida -->
+      <button id="restart-game-btn" type="button">
+        <i class="fa-solid fa-rotate"></i>
+        Recomeçar jogo
+      </button>
+      
+    </div>
+  </div>
+  
+  <!-- PROPOSTA DE EMPATE -->
+  <div id="draw-agreement-overlay" class="checkmate-overlay" hidden>
+    <div class="checkmate-panel draw-agreement-content" role="dialog" aria-modal="true" aria-labelledby="draw-agreement-title">
+      
+      <div class="checkmate-icon">
+        <i class="fa-solid fa-handshake"></i>
+      </div>
+      
+      <h2 id="draw-agreement-title">
+        PROPOSTA DE EMPATE!
+      </h2>
+      
+      <p>O adversário concorda com o empate?</p>
+      
+      <div class="draw-agreement-buttons">
+        
+        <button id="accept-draw-btn" type="button">
+          <i class="fa-solid fa-check"></i>
+          Aceitar
+        </button>
+        
+        <button id="decline-draw-btn" type="button">
+          <i class="fa-solid fa-xmark"></i>
+          Recusar
+        </button>
+        
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- CONFIRMAÇÃO DE DESISTÊNCIA -->
+  <div id="resign-overlay" class="checkmate-overlay" hidden>
+    <div class="checkmate-panel resign-content" role="dialog" aria-modal="true" aria-labelledby="resign-title">
+      
+      <div class="checkmate-icon">
+        <i class="fa-solid fa-flag"></i>
+      </div>
+      
+      <h2 id="resign-title">DESISTIR DA PARTIDA?</h2>
+      
+      <p>Tem certeza de que deseja abandonar a partida?</p>
+      
+      <div class="resign-buttons">
+        
+        <button id="confirm-resign-btn" type="button">
+          <i class="fa-solid fa-check"></i>
+          Confirmar
+        </button>
+        
+        <button id="cancel-resign-btn" type="button">
+          <i class="fa-solid fa-xmark"></i>
+          Cancelar
+        </button>
+        
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- SCRIPTS -->
+  <script type="module" src="src/script/chess-game.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+  
+  
+  <div id="stats-confirm-overlay" hidden>
+    <div class="stats-confirm-box" role="dialog" aria-modal="true" aria-labelledby="stats-confirm-title">
+      
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      
+      <h2 id="stats-confirm-title"></h2>
+      
+      <p id="stats-confirm-message"></p>
+      
+      <span>Esta ação não poderá ser desfeita.</span>
+      
+      <div class="stats-confirm-actions">
+        <button id="stats-cancel-btn" type="button">
+          CANCELAR
+        </button>
+        
+        <button id="stats-confirm-btn" type="button">
+          APAGAR
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  
+</body>
+
+</html>

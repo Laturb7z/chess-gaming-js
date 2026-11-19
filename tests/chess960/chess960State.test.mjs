@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { captureGameState } from '../../src/script/systems/gameState.js';
+const mockBoard = {querySelectorAll: () => []};
+const base = { chessboard: mockBoard, positionHistory: [], chessVariant: 'chess960', chess960Position: 42 };
+const state = captureGameState(base);
+assert.equal(state.chessVariant, 'chess960');
+assert.equal(state.chess960Position, 42);
+const legacy = captureGameState({chessboard: mockBoard, positionHistory: []});
+assert.equal(legacy.chessVariant, 'classic');
+assert.equal(legacy.chess960Position, 518);
+console.log('Chess960 state: metadados e compatibilidade retroativa aprovados');
